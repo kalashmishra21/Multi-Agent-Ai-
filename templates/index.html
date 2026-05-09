@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Study Planner — Multi-Agent System</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">🎓</span>
+        <div>
+          <h1>AI Study Planner</h1>
+          <p>Multi-Agent System &mdash; LangChain + LangGraph + Gemini</p>
+        </div>
+      </div>
+      <div class="badges">
+        <span class="badge">4 AI Agents</span>
+        <span class="badge badge-green">Gemini 2.5 Flash</span>
+        <span class="badge badge-purple">LangGraph</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main">
+
+    <!-- LEFT: Form -->
+    <section class="card form-card" id="formSection">
+      <h2 class="card-title">📋 Your Study Details</h2>
+      <p class="card-subtitle">Fill in your details and let 4 AI agents build your personalized roadmap.</p>
+
+      <form id="studyForm" autocomplete="off">
+
+        <div class="form-group">
+          <label for="subject">Subject <span class="required">*</span></label>
+          <div class="autocomplete-wrapper">
+            <input type="text" id="subject" name="subject" placeholder="e.g. Machine Learning, Web Development, DSA" required autocomplete="off" />
+            <ul class="suggestions-list" id="suggestionsList"></ul>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="goal">Your Goal <span class="required">*</span></label>
+          <input type="text" id="goal" name="goal" placeholder="e.g. Get a job as ML engineer, Crack FAANG interviews" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="hours_per_day">Hours Per Day <span class="required">*</span></label>
+            <input type="number" id="hours_per_day" name="hours_per_day" placeholder="e.g. 2" min="0.5" max="24" step="0.5" required />
+          </div>
+          <div class="form-group">
+            <label for="deadline">Deadline <span class="required">*</span></label>
+            <input type="text" id="deadline" name="deadline" placeholder="e.g. 30 days, 3 months" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="learning_style">Learning Style <span class="required">*</span></label>
+          <select id="learning_style" name="learning_style" required>
+            <option value="" disabled selected>Select your learning style</option>
+            <option value="visual">Visual — Learn through diagrams, videos, charts</option>
+            <option value="auditory">Auditory — Learn through listening and discussion</option>
+            <option value="reading">Reading/Writing — Learn through text and notes</option>
+            <option value="kinesthetic">Kinesthetic — Learn through hands-on practice</option>
+            <option value="mixed">Mixed — Combination of all styles</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-generate" id="generateBtn">
+          <span class="btn-icon">⚡</span>
+          <span class="btn-text">Generate My Study Plan</span>
+        </button>
+
+      </form>
+
+      <!-- Agent Pipeline Visualization -->
+      <div class="pipeline" id="pipeline" style="display:none;">
+        <h3 class="pipeline-title">Agent Pipeline</h3>
+        <div class="agents">
+          <div class="agent-step" id="agent-1">
+            <div class="agent-icon">🔍</div>
+            <div class="agent-info">
+              <span class="agent-name">Requirement Analyzer</span>
+              <span class="agent-status" id="status-1">Waiting...</span>
+            </div>
+            <div class="agent-indicator" id="indicator-1"></div>
+          </div>
+          <div class="agent-connector"></div>
+          <div class="agent-step" id="agent-2">
+            <div class="agent-icon">📚</div>
+            <div class="agent-info">
+              <span class="agent-name">Research Agent</span>
+              <span class="agent-status" id="status-2">Waiting...</span>
+            </div>
+            <div class="agent-indicator" id="indicator-2"></div>
+          </div>
+          <div class="agent-connector"></div>
+          <div class="agent-step" id="agent-3">
+            <div class="agent-icon">📅</div>
+            <div class="agent-info">
+              <span class="agent-name">Planner Agent</span>
+              <span class="agent-status" id="status-3">Waiting...</span>
+            </div>
+            <div class="agent-indicator" id="indicator-3"></div>
+          </div>
+          <div class="agent-connector"></div>
+          <div class="agent-step" id="agent-4">
+            <div class="agent-icon">✅</div>
+            <div class="agent-info">
+              <span class="agent-name">Reviewer Agent</span>
+              <span class="agent-status" id="status-4">Waiting...</span>
+            </div>
+            <div class="agent-indicator" id="indicator-4"></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- RIGHT: Output -->
+    <section class="card output-card" id="outputSection">
+      <div class="output-placeholder" id="outputPlaceholder">
+        <div class="placeholder-icon">🤖</div>
+        <h3>Your Study Plan Will Appear Here</h3>
+        <p>Fill in the form and click <strong>Generate My Study Plan</strong> to get started.</p>
+        <div class="feature-list">
+          <div class="feature-item"><span>🔍</span> Requirement Analysis</div>
+          <div class="feature-item"><span>📚</span> Topic Research</div>
+          <div class="feature-item"><span>📅</span> Day-wise Schedule</div>
+          <div class="feature-item"><span>✅</span> Expert Review</div>
+        </div>
+      </div>
+
+      <!-- Error Box -->
+      <div class="error-box" id="errorBox" style="display:none;">
+        <span class="error-icon">⚠️</span>
+        <span id="errorMessage"></span>
+      </div>
+
+      <!-- Output Content -->
+      <div id="outputContent" style="display:none;">
+        <div class="output-header">
+          <h2 class="output-title">📖 Your Personalized Study Plan</h2>
+          <button class="btn-copy" id="copyBtn" onclick="copyOutput()">📋 Copy</button>
+        </div>
+        <div class="output-body" id="outputBody"></div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <p>Built with LangChain + LangGraph + Google Gemini &nbsp;|&nbsp; Multi-Agent AI System</p>
+  </footer>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>

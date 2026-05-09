@@ -57,7 +57,7 @@ def get_llm() -> ChatGoogleGenerativeAI:
             "See .env.example for reference.\n"
         )
     return ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash",   # Fast, free-tier friendly Gemini model
+        model="gemini-2.0-flash",   # Fast, free-tier friendly Gemini model
         temperature=0.7,
         google_api_key=api_key,
         convert_system_message_to_human=True,  # Gemini requires this for system msgs
